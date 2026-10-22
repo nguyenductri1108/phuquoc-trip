@@ -1,0 +1,8 @@
+/* sticky day switcher, sized up from the transitions.dev tabs snippet */
+.days { display: flex; width: 100%; margin-top: 16px; position: sticky; top: 8px; z-index: 900; box-shadow: 0 0 0 4px var(--bg); }
+.days .t-tab { flex: 1; height: 52px; padding: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.25; min-width: 0; }
+.days .t-tabs-pill { height: 52px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.12); }
+.days .t-tab b { font-size: 14px; }
+.days .t-tab > span { font-size: 12px; white-space: nowrap; }
+.days .t-tab.today b::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 4px; border-radius: 50%; background: var(--sun); vertical-align: middle; }
+@media (min-width: 960px) { .days { top: 0; box-shadow: 0 0 0 8px var(--bg); } }

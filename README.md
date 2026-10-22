@@ -1,0 +1,48 @@
+# Phú Quốc 24–27/10 · lịch trình nhóm
+
+Trang web (React + Vite + TypeScript, chỉ frontend) cho chuyến Phú Quốc của nhóm 8 người. Trang chạy theo giờ thật (giờ Việt Nam):
+
+- Thẻ "Bây giờ" cho biết đang làm gì và tiếp theo đi đâu. Trước ngày đi thì đếm ngược.
+- Bản đồ vẽ lộ trình từng ngày, có nút xem vị trí của mình.
+- Có thời tiết, dresscode và đồ cần mang cho từng ngày.
+- Có checklist việc cần đặt trước và danh bạ quán.
+
+## Chạy
+
+```bash
+npm install
+npm run dev          # http://localhost:5173 – thêm ?t=2026-10-25T14:00 để xem thử một thời điểm bất kỳ
+npm test             # kiểm tra logic giờ / dữ liệu (src/lib/trip.test.ts)
+npm run build        # ra thư mục dist/ để deploy
+```
+
+## Dữ liệu = Google Sheet
+
+`src/config.ts` → `SHEET_URL`. Trang đọc Sheet mỗi phút, sửa trên Sheet thì khoảng 1 phút sau cả nhóm thấy, không cần deploy lại. Sheet phải để chia sẻ "Bất kỳ ai có đường liên kết – Người xem".
+
+| Tab | Một dòng là | Cột chính |
+|---|---|---|
+| `quan` | một quán / địa điểm | `id` (mã không dấu), `ten`, `nhom` (an · bien · choi · mua · nghi · spa · hat · bay), `dia_chi`, `dien_thoai`, `gio_mo_cua`, `danh_gia`, `gia`, `toa_do` ("vĩ độ, kinh độ"), `maps` |
+| `lich` | một mục trong lịch | `ngay` (1–4), `bat_dau`, `ket_thuc` (trống = tới mục sau), `hoat_dong`, `dresscode`, `quan` / `du_phong` (id ở tab quan), `mo_ta`, `du_phong_mo_ta`, `gia`, `luu_y`, `dat_truoc`, `di_chuyen`, `links` |
+| `ngay` | một ngày | `ngay`, `tieu_de` |
+| `canh_bao` | một lưu ý | `muc` (🔴 / 🟡 / 🟢), `ngay` (trống = chung), `tieu_de`, `chi_tiet`, `links` |
+
+Mẹo:
+
+- **Đổi quán:** thêm quán mới ở tab `quan`. Lấy toạ độ bằng cách chuột phải vào điểm trên Google Maps rồi bấm vào dòng toạ độ để copy. Sau đó sửa cột `quan` ở dòng lịch tương ứng, nhớ sửa luôn `mo_ta`, `gia`, `luu_y` của dòng đó cho khớp.
+- **Đánh dấu đã đặt xong:** thêm `✓ ` vào đầu dòng ở cột `dat_truoc`. Checklist của cả nhóm sẽ tự tick.
+- **Nhiều mục trong một ô:** cột `links` và `dat_truoc` ghi mỗi mục một dòng (Alt/Option + Enter để xuống dòng trong ô). Link viết theo dạng `Tên | URL`.
+- **Câu "Mang …"** trong cột `luu_y` sẽ tự vào danh sách "mang theo" của ngày đó.
+- **Dòng sai** (giờ không đọc được, id quán không có) sẽ bị bỏ qua và báo ở cuối trang. Trang không bị sập.
+
+`src/data/trip.json` là bản dự phòng khi mất mạng. Trước mỗi lần deploy, chạy `npm run pull-sheet` để cập nhật nó từ Sheet.
+
+## Deploy (host tĩnh)
+
+`npm run build` rồi đưa thư mục `dist/` lên host. Cấu hình `base: './'` nên trang chạy được ở bất kỳ đường dẫn nào.
+
+- **Netlify Drop:** kéo thả `dist/` vào <https://app.netlify.com/drop>.
+- **Vercel / Netlify qua GitHub:** import repo, build command `npm run build`, output `dist`.
+- **GitHub Pages:** đẩy `dist/` lên nhánh `gh-pages`, hoặc dùng GitHub Actions.
+
+Bản đồ: © OpenStreetMap contributors. Thời tiết: Open-Meteo. Trang có `noindex` nên không bị Google tìm thấy.

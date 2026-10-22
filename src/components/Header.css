@@ -1,0 +1,14 @@
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: max(16px, env(safe-area-inset-top)); }
+.top h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; }
+.top h1 span { color: var(--text-3); font-weight: 600; }
+.top p { font-size: 13px; color: var(--text-3); }
+.sync {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 10px; border-radius: 48px;
+  border: 1px solid var(--line); background: var(--surface); font-size: 12px; font-weight: 600; color: var(--text-2); cursor: pointer; white-space: nowrap;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); flex: none; }
+.sync[data-state="live"] .dot { background: var(--green); animation: ping-green 2s ease-out infinite; }
+.sync[data-state="error"] .dot { background: var(--amber); }
+@keyframes ping-green { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 50%, transparent); } to { box-shadow: 0 0 0 6px transparent; } }
+.preview { margin-top: 12px; padding: 8px 12px; border-radius: var(--r); background: var(--amber-tint); color: var(--amber); font-size: 13px; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .sync .dot { animation: none; } }

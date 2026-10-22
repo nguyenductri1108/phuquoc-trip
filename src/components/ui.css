@@ -1,0 +1,29 @@
+.acc-head { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 0; background: none; text-align: left; cursor: pointer; }
+.acc-head .t { flex: 1; font-weight: 600; font-size: 14px; }
+.acc-head .lv { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.acc-body { padding: 0 12px 12px; font-size: 14px; color: var(--text-2); }
+.t-acc-chevron { color: var(--text-3); }
+.t-acc-chevron svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* warnings: severity is spelled out, the colour only backs it up */
+.alerts { display: grid; gap: 8px; }
+.alert { border-left: 4px solid var(--amber); background: var(--amber-tint); border-radius: var(--r); }
+.alert[data-lv="red"] { border-color: var(--red); background: var(--red-tint); }
+.alert[data-lv="green"] { border-color: var(--green); background: var(--green-tint); }
+.alert[data-lv="red"] .lv { color: var(--red); }
+.alert[data-lv="amber"] .lv { color: var(--amber); }
+.alert[data-lv="green"] .lv { color: var(--green); }
+
+.links { display: grid; gap: 4px; margin-top: 6px; }
+.links a { display: inline-flex; align-items: center; gap: 6px; }
+.links .ico { width: 14px; height: 14px; }
+
+.t-check { --check-len: 16; width: 22px; height: 22px; margin-top: 1px; display: grid; place-items: center; border-radius: 6px; border: 2px solid var(--line); background: var(--surface); }
+.t-check[aria-checked="true"] { background: var(--green); border-color: var(--green); }
+.t-check svg { width: 12px; height: 12px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 2000; translate: -50% 0;
+  width: max-content; max-width: min(92vw, 440px); padding: 12px 16px; border-radius: var(--r-lg);
+  background: var(--text); color: var(--bg); font-size: 14px; font-weight: 600; box-shadow: 0 6px 24px rgb(0 0 0 / 0.25); pointer-events: none;
+}

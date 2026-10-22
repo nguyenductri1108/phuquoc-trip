@@ -1,0 +1,20 @@
+.list { margin-top: 10px; }
+.book { display: grid; grid-template-columns: 24px 1fr auto; gap: 10px; align-items: start; padding: 12px 0; border-top: 1px solid var(--line); }
+.book p { font-size: 14px; }
+.book[data-done="true"] p { color: var(--text-3); text-decoration: line-through; }
+.meta { font-size: 13px; color: var(--text-3); }
+.linkish { display: block; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; }
+.linkish:hover { color: var(--sea); text-decoration: underline; }
+
+.grp { border-top: 1px solid var(--line); }
+.grp > .acc-head { padding: 12px 0; }
+.grp > .acc-head .t { font-size: 15px; }
+.grp small { color: var(--text-3); font-weight: 600; }
+.place { padding: 10px 0; border-top: 1px dashed var(--line); font-size: 14px; }
+.place:first-child { border-top: 0; }
+.place b { display: block; }
+.place .acts { margin-top: 8px; }
+.place .btn { min-height: 36px; padding: 6px 10px; font-size: 13px; }
+
+.foot { margin-top: 24px; font-size: 12px; color: var(--text-3); display: grid; gap: 6px; }
+.foot summary { cursor: pointer; color: var(--amber); font-weight: 600; }

@@ -1,0 +1,11 @@
+.day-head { padding: 16px; }
+.day-head h2 { font-size: 20px; font-weight: 800; line-height: 1.3; }
+.day-head .sub { color: var(--text-2); }
+.wx-line { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; font-size: 13px; color: var(--text-2); }
+.kit { margin-top: 12px; display: grid; gap: 10px; }
+.kit > div { display: grid; grid-template-columns: 18px 1fr; gap: 8px; font-size: 14px; }
+.kit .ico { margin-top: 2px; color: var(--text-3); }
+.kit ul { display: grid; gap: 2px; }
+.kit li { display: flex; gap: 8px; }
+.kit li .num { color: var(--text-3); min-width: 38px; }
+.day-alerts { margin-top: 8px; }
