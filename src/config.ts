@@ -6,4 +6,4 @@ export const START = '2026-10-24'; // ngày 1 của chuyến đi (giờ Việt N
 export const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1xOTDphGa7VCNiCo6DPNSSY9sj-1bCDt75tvwFU74uJM/edit';
 export const POLL_MS = 60_000;
 export const NOTE =
-  'Dữ liệu Google Maps (điểm, số review, giờ mở cửa) lấy ngày 22/10/2026 – giá là ước tính từ review/mức giá Google, nên gọi xác nhận trước. Giả định villa ở Dương Đông/Bãi Trường.';
+  'Dữ liệu Google Maps (điểm, số review, giờ mở cửa) lấy ngày 22/10/2026 – giá là ước tính từ review/mức giá Google, nên gọi xác nhận trước. Chỗ ở: Sailing Club Signature Resort (Bãi Trường, phía nam sân bay).';

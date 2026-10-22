@@ -50,7 +50,7 @@ test('helpers', () => {
   assert.equal(tel('+84 394 241 419 (có WhatsApp/Zalo)'), 'tel:+84394241419');
   assert.equal(links('A | https://x.vn/a\nhttps://www.foody.vn/b')[1].ten, 'foody.vn');
   assert.match(dirUrl(t.quan.ngon83), /destination_place_id=ChIJ-eA02-6NpzERxPjZuX6DDWo/);
-  assert.match(dirUrl(t.quan.villa), /destination=10\.2045,103\.965$/);
+  assert.match(dirUrl(t.quan.villa), /destination=10\.1153507,103\.9899345$/);
   // a place added in the sheet without coordinates still gets directions
   const bare = { ...t.quan.ngon83, maps: '', lat: null, lng: null };
   assert.equal(dirUrl(bare), 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(`${bare.ten}, ${bare.dia_chi}, Phú Quốc`));

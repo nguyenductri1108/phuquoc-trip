@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-22T03:22:35.383Z",
+ "updated": "2026-10-22T10:52:43.045Z",
  "ngay": [
   {
    "ngay": "1",
@@ -580,16 +580,16 @@
   },
   {
    "id": "villa",
-   "ten": "Villa của nhóm",
+   "ten": "Sailing Club Signature Resort Phú Quốc",
    "nhom": "nghi",
-   "loai": "Chỗ ở (vị trí giả định – sửa khi chốt villa)",
-   "dia_chi": "Khu Dương Đông / Bãi Trường (chưa chốt)",
-   "dien_thoai": "",
+   "loai": "Resort – chỗ ở của nhóm",
+   "dia_chi": "Tổ 3, KP7, An Thới (khu Bãi Trường) – cách sân bay ~10 km",
+   "dien_thoai": "+84 297 3559 888",
    "gio_mo_cua": "Nhận phòng 14:00 · trả phòng 11:00",
-   "danh_gia": "",
+   "danh_gia": "4.9",
    "gia": "",
-   "toa_do": "10.204500, 103.965000",
-   "maps": ""
+   "toa_do": "10.1153507, 103.9899345",
+   "maps": "https://www.google.com/maps/place/Sailing+Club+Signature+Resort+Phu+Quoc/@10.1153507,103.9899345,16z/data=!4m9!3m8!1s0x31a7936d1a86cb47:0x7d2d600a76f4230b!5m2!4m1!1i2!8m2!3d10.1153507!4d103.9899345!16s%2Fg%2F11rcs3x07s"
   }
  ],
  "lich": [
