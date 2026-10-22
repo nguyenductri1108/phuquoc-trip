@@ -10,5 +10,5 @@
 .sync[data-state="live"] .dot { background: var(--green); animation: ping-green 2s ease-out infinite; }
 .sync[data-state="error"] .dot { background: var(--amber); }
 @keyframes ping-green { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 50%, transparent); } to { box-shadow: 0 0 0 6px transparent; } }
-.preview { margin-top: 12px; padding: 8px 12px; border-radius: var(--r); background: var(--amber-tint); color: var(--amber); font-size: 13px; font-weight: 600; }
+.preview { display: block; margin-top: 12px; padding: 8px 12px; border-radius: var(--r); background: var(--amber-tint); color: var(--amber); font-size: 13px; font-weight: 600; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) { .sync .dot { animation: none; } }

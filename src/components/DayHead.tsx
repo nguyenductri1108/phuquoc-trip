@@ -8,6 +8,9 @@ import './DayHead.css';
 
 const LV: Record<string, [string, string, number]> = { '🔴': ['red', 'Quan trọng', 0], '🟡': ['amber', 'Lưu ý', 1], '🟢': ['green', 'Mẹo', 2] };
 export const level = (m: string) => LV[m.trim()] ?? LV['🟡'];
+// stable per warning (not per position), so an edit in the sheet doesn't open a different one
+export const warnId = (prefix: string, w: Warning) =>
+  `${prefix}-${[...`${w.ngay}|${w.tieu_de}`].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7).toString(36)}`;
 
 export function Alert({ w, id, open, onToggle }: { w: Warning; id: string; open: boolean; onToggle: (id: string) => void }) {
   const [lv, label] = level(w.muc);
@@ -54,7 +57,7 @@ export function DayHead({ trip, day, wx, open, onToggle }: {
       </section>
       {alerts.length > 0 && (
         <div className="alerts day-alerts">
-          {alerts.map((a, i) => { const id = `al-${day}-${i}`; return <Alert key={id} id={id} w={a} open={open.has(id)} onToggle={onToggle} />; })}
+          {alerts.map(a => { const id = warnId('al', a); return <Alert key={id} id={id} w={a} open={open.has(id)} onToggle={onToggle} />; })}
         </div>
       )}
     </>

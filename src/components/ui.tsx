@@ -19,6 +19,7 @@ const PATHS = {
   ext: <path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />,
   share: <><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" /></>,
   chat: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
+  info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></>,
 };
 export type IconName = keyof typeof PATHS;
 export const Icon = ({ name }: { name: IconName }) => <svg className="ico" viewBox="0 0 24 24" aria-hidden="true">{PATHS[name]}</svg>;
@@ -45,7 +46,7 @@ export function Actions({ q, onMap, children }: { q: Place; onMap?: (id: string)
   const z = zalo(q.dien_thoai);
   return (
     <div className="acts">
-      {q.lat != null && <a className="btn primary" href={dirUrl(q)} target="_blank" rel="noopener"><Icon name="nav" />Chỉ đường</a>}
+      <a className="btn primary" href={dirUrl(q)} target="_blank" rel="noopener"><Icon name="nav" />Chỉ đường</a>
       {q.dien_thoai && <a className="btn" href={tel(q.dien_thoai)} aria-label={`Gọi ${q.ten} – ${q.dien_thoai}`}><Icon name="phone" />Gọi</a>}
       {z && <a className="btn" href={z} target="_blank" rel="noopener" aria-label={`Nhắn Zalo ${q.ten}`}><Icon name="chat" />Zalo</a>}
       {onMap && q.lat != null && <button className="btn" type="button" onClick={() => onMap(q.id)}><Icon name="pin" />Bản đồ</button>}

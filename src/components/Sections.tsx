@@ -3,7 +3,7 @@ import { NHOM, byPhone, fmtKm, isDone, km, lines, stripDone, tel } from '../lib/
 import type { LatLng, Place, Trip } from '../lib/trip.ts';
 import type { SyncState } from '../lib/hooks.ts';
 import { Acc, Actions, Check, Icon } from './ui.tsx';
-import { Alert, level } from './DayHead.tsx';
+import { Alert, level, warnId } from './DayHead.tsx';
 import './Sections.css';
 
 /** Everything in the sheet's dat_truoc column. "✓ " at the start of a line = done, for the whole group. */
@@ -42,7 +42,7 @@ export function Notes({ trip, open, onToggle }: { trip: Trip; open: Set<string>;
     <section className="card pad" id="notes" aria-labelledby="notesTitle">
       <h2 className="h2" id="notesTitle">Tất cả lưu ý <small className="num">{all.length}</small></h2>
       <div className="alerts list">
-        {all.map((w, i) => { const id = `note-${i}`; return <Alert key={id} id={id} w={w} open={open.has(id)} onToggle={onToggle} />; })}
+        {all.map(w => { const id = warnId('note', w); return <Alert key={id} id={id} w={w} open={open.has(id)} onToggle={onToggle} />; })}
       </div>
     </section>
   );
@@ -81,7 +81,7 @@ export function Directory({ trip, me, open, onToggle, onMap }: {
 
 export function Footer({ trip, sync }: { trip: Trip; sync: SyncState }) {
   return (
-    <footer className="foot">
+    <footer className="foot" id="foot">
       <p>{NOTE}</p>
       <p>
         Nguồn: {!SHEET_URL ? 'dữ liệu có sẵn' : sync.state === 'live' ? 'Google Sheet (trực tiếp)' : 'bản lưu gần nhất của Google Sheet'}
@@ -90,8 +90,8 @@ export function Footer({ trip, sync }: { trip: Trip; sync: SyncState }) {
       </p>
       {sync.err && <p>Lỗi Google Sheet: {sync.err}</p>}
       {trip.issues.length > 0 && (
-        <details>
-          <summary>{trip.issues.length} dòng dữ liệu trong Sheet bị bỏ qua</summary>
+        <details open>
+          <summary>{trip.issues.length} dòng trong Google Sheet cần sửa</summary>
           <ul>{trip.issues.map(i => <li key={i}>{i}</li>)}</ul>
         </details>
       )}

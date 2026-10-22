@@ -46,8 +46,9 @@ export default function App() {
   // at the 04:00 rollover, follow the trip only if the viewer was looking at the day that just ended
   const prevToday = useRef(today);
   useEffect(() => {
-    if (during && today !== prevToday.current) setDay(d => (d === prevToday.current ? today : d));
+    const prev = prevToday.current; // captured now: the updater runs later, after the ref has moved on
     prevToday.current = today;
+    if (during && today !== prev) setDay(d => (d === prev ? today : d));
   }, [today, during]);
 
   useEffect(() => {
@@ -109,10 +110,13 @@ export default function App() {
     <div className="app">
       <Header now={now} sync={sync} onSync={() => pull(true)} />
       {simulated && <p className="preview">Đang xem thử thời gian (link có ?t=…). Bỏ phần ?t trên link để về giờ thật.</p>}
+      {trip.issues.length > 0 && (
+        <a className="preview issues" href="#foot">⚠ {trip.issues.length} dòng trong Google Sheet chưa đúng – trang tạm bỏ qua. Xem chi tiết ↓</a>
+      )}
       <NowCard trip={trip} now={now} tl={tl} today={today} last={last} wx={wx} me={geo.me} onGoto={goto} onMap={fly}
         onDay={n => { selectDay(n); setScrollTo('dayTitle'); }} />
       <p className="sr" aria-live="polite">{say}</p>
-      <DayTabs last={last} day={shown} today={during ? today : 0} wx={wx} onSelect={selectDay} />
+      <DayTabs last={last} day={shown} today={during ? today : 0} wx={wx} onSelect={n => { selectDay(n); setScrollTo('dayTitle'); }} />
       <DayHead trip={trip} day={shown} wx={wx} open={open} onToggle={toggle} />
       <MapView trip={trip} day={shown} now={now} cur={tl.cur} next={tl.next} open={open} focus={focus} meFocus={meFocus}
         me={geo.me} fitKey={`${shown}:${fitN}`} locating={geo.on} onFit={() => setFitN(n => n + 1)} onGoto={goto}

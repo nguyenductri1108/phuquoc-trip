@@ -27,13 +27,15 @@ export function Timeline({ trip, day, now, cur, next, open, changed, ...rest }: 
 }) {
   const items = trip.lich.filter(x => x.ngay === day), nos = numbering(trip.quan, items);
   return (
-    <ol className="tl enter" id="timeline" role="tabpanel" aria-labelledby={`tab-${day}`} key={day}>
-      {items.length ? items.map((x, i) => (
-        <StopItem key={x.key} x={x} i={i} q={trip.quan[x.quan]} b={trip.quan[x.du_phong]} no={nos.get(x.quan)}
-          st={x === cur ? 'now' : x === next ? 'next' : x.end <= now ? 'past' : 'later'}
-          open={open.has(x.key)} isNew={changed.has(x.key)} {...rest} />
-      )) : <li className="hint">Chưa có lịch cho ngày này.</li>}
-    </ol>
+    <div id="timeline" role="tabpanel" aria-labelledby={`tab-${day}`} key={day}>
+      <ol className="tl enter">
+        {items.length ? items.map((x, i) => (
+          <StopItem key={x.key} x={x} i={i} q={trip.quan[x.quan]} b={trip.quan[x.du_phong]} no={nos.get(x.quan)}
+            st={x === cur ? 'now' : x === next ? 'next' : x.end <= now ? 'past' : 'later'}
+            open={open.has(x.key)} isNew={changed.has(x.key)} {...rest} />
+        )) : <li className="hint">Chưa có lịch cho ngày này.</li>}
+      </ol>
+    </div>
   );
 }
 

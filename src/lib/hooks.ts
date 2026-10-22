@@ -41,9 +41,11 @@ interface Cache { at: number; data: RawTrip }
 const BUNDLED = bundled as RawTrip & { updated?: string };
 
 export function useTripData(notify: (msg: string, keys?: string[]) => void) {
+  const fromCache = useRef(false); // started from what this viewer saw last time → announce what changed since
   const [raw, setRaw] = useState<RawTrip>(() => {
     const c = SHEET_URL ? store.get<Cache>('pq-sheet') : null;
-    return c && c.at > Date.parse(BUNDLED.updated ?? '') ? c.data : BUNDLED;
+    fromCache.current = !!c && c.at > Date.parse(BUNDLED.updated ?? '');
+    return fromCache.current ? c!.data : BUNDLED;
   });
   const [sync, setSync] = useState<SyncState>(() =>
     ({ state: SHEET_URL ? 'loading' : 'local', at: store.get<Cache>('pq-sheet')?.at ?? 0, err: '' }));
@@ -64,11 +66,12 @@ export function useTripData(notify: (msg: string, keys?: string[]) => void) {
       const d = diffTrips(current.current, normalize(data, START));
       if (d.changed) {
         setRaw(data);
-        if (!first) notify(`Sheet vừa cập nhật · ${d.message}`, d.keys);
+        if (!first || fromCache.current) notify(`Sheet vừa cập nhật · ${d.message}`, d.keys);
       } else if (manual) notify('Dữ liệu đã là mới nhất');
       setSync({ state: 'live', at: Date.now(), err: '' });
     } catch (e) {
-      const err = e instanceof TypeError ? 'không kết nối được (mất mạng, hoặc Sheet chưa chia sẻ “Bất kỳ ai có đường liên kết”)' : (e as Error).message;
+      const offline = e instanceof TypeError || (e as Error).name === 'TimeoutError';
+      const err = offline ? 'không kết nối được (mất mạng, hoặc Sheet chưa chia sẻ “Bất kỳ ai có đường liên kết”)' : (e as Error).message;
       setSync(s => ({ ...s, state: 'error', err }));
       if (manual) notify(`Không tải được Sheet: ${err}`);
     } finally { busy.current = false; }

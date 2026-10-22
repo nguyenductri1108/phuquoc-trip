@@ -51,6 +51,10 @@ test('helpers', () => {
   assert.equal(links('A | https://x.vn/a\nhttps://www.foody.vn/b')[1].ten, 'foody.vn');
   assert.match(dirUrl(t.quan.ngon83), /destination_place_id=ChIJ-eA02-6NpzERxPjZuX6DDWo/);
   assert.match(dirUrl(t.quan.villa), /destination=10\.2045,103\.965$/);
+  // a place added in the sheet without coordinates still gets directions
+  const bare = { ...t.quan.ngon83, maps: '', lat: null, lng: null };
+  assert.equal(dirUrl(bare), 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(`${bare.ten}, ${bare.dia_chi}, Phú Quốc`));
+  assert.equal(dirUrl({ ...bare, maps: 'https://maps.app.goo.gl/abc' }), 'https://maps.app.goo.gl/abc');
   assert.deepEqual(swatches('Trắng – hồng'), ['#ffffff', '#f4a8b8']);
   assert.deepEqual(swatches('Nâu be'), ['#7b4a2a', '#e3d3b4']);
   assert.deepEqual(bring(t.lich.filter(x => x.ngay === 3)).map(b => b.gio), ['10:00', '12:00', '15:00', '17:15']);
@@ -80,8 +84,17 @@ test('bad sheet edits are reported, not fatal', () => {
   const broken = structuredClone(raw);
   broken.lich[3].bat_dau = 'chiều';
   broken.lich[4].quan = 'khongco';
+  broken.lich[5].ngay = '25'; // a calendar date typed where the trip day belongs
   broken.quan[0].toa_do = '';
   const r = normalize(broken, START);
-  assert.equal(r.issues.length, 3);
-  assert.equal(r.lich.length, 41);
+  assert.equal(r.issues.length, 4);
+  assert.equal(r.lich.length, 40);
+});
+
+test('0:00–3:59 is the late night of that trip day', () => {
+  const late = structuredClone(raw);
+  late.lich.find(r => r.hoat_dong === 'Về phòng nghỉ')!.bat_dau = '0:30';
+  const x = normalize(late, START).lich.find(s => s.hoat_dong === 'Về phòng nghỉ')!;
+  assert.equal(hm(x.start), '10-25T00:30');
+  assert.equal(x.key, 'it-1-1470');
 });

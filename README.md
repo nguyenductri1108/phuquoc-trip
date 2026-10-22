@@ -33,7 +33,12 @@ Mẹo:
 - **Đánh dấu đã đặt xong:** thêm `✓ ` vào đầu dòng ở cột `dat_truoc`. Checklist của cả nhóm sẽ tự tick.
 - **Nhiều mục trong một ô:** cột `links` và `dat_truoc` ghi mỗi mục một dòng (Alt/Option + Enter để xuống dòng trong ô). Link viết theo dạng `Tên | URL`.
 - **Câu "Mang …"** trong cột `luu_y` sẽ tự vào danh sách "mang theo" của ngày đó.
-- **Dòng sai** (giờ không đọc được, id quán không có) sẽ bị bỏ qua và báo ở cuối trang. Trang không bị sập.
+- **Giờ từ 0:00 đến 3:59** được tính là đêm muộn của ngày ghi ở cột `ngay`. Ví dụ "0:30" ở ngày 1 nghĩa là 0:30 rạng sáng 25/10. Ngày trên trang chuyển lúc 4:00 sáng.
+- **Quán chưa có toạ độ** vẫn có nút "Chỉ đường" (tìm theo tên + địa chỉ, hoặc theo link Maps trong cột `maps`). Thêm `toa_do` thì quán mới hiện trên bản đồ.
+- **Dòng sai** (giờ không đọc được, id quán không có, ngày không có trong tab `ngay`) sẽ bị bỏ qua. Đầu trang hiện thông báo vàng, cuối trang ghi rõ dòng nào sai và vì sao. Trang không bị sập.
+- **Sau khi sửa:** khoảng 1 phút sau, máy nào đang mở trang cũng tự cập nhật, có toast báo thay đổi (ví dụ "N1 18:00: Xin Chào → Ra Khơi") và chip "Mới đổi" ở mục vừa đổi. Bấm nút "Trực tiếp" để lấy ngay.
+
+Trên điện thoại, chọn "Thêm vào màn hình chính" (Safari: nút Chia sẻ; Chrome: menu ⋮) để mở trang như một app.
 
 `src/data/trip.json` là bản dự phòng khi mất mạng. Trước mỗi lần deploy, chạy `npm run pull-sheet` để cập nhật nó từ Sheet.
 

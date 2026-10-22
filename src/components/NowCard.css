@@ -1,10 +1,11 @@
-.now { padding: 16px; }
+.nowcard { padding: 16px; }
 .eyebrow { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
 .eyebrow.live { color: var(--sun); }
 .eyebrow.live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--sun); animation: ping-sun 1.6s ease-out infinite; }
 @keyframes ping-sun { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sun) 55%, transparent); } to { box-shadow: 0 0 0 7px transparent; } }
 .now-title { font-size: 22px; font-weight: 800; line-height: 1.3; margin-top: 6px; }
 .now-place { color: var(--text-2); margin-top: 2px; }
+.nw { white-space: nowrap; }
 .now-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .now-meta:empty { display: none; }
 
@@ -43,3 +44,10 @@
 .prep a.bad { background: var(--red-tint); color: var(--red); }
 
 @media (prefers-reduced-motion: reduce) { .eyebrow.live::before { animation: none; } .bar span { transition: none; } }
+
+/* phones: one row of app-style buttons (icon over label) instead of two wrapped rows */
+@media (max-width: 959px) {
+  .nowcard .acts { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
+  .nowcard .acts .btn { flex-direction: column; justify-content: center; gap: 4px; min-height: 60px; padding: 8px 2px; font-size: 12px; text-align: center; }
+  .nowcard .acts .btn .ico { width: 20px; height: 20px; }
+}

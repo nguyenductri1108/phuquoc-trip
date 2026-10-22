@@ -3,7 +3,7 @@
   color-scheme: light dark;
   --bg: #f6f3ec; --surface: #fff; --surface-2: #ece6da; --line: #d9d2c4;
   --text: #12191c; --text-2: #46535a; --text-3: #5f6b71;
-  --sea: #0b6b65; --on-sea: #fff; --sun: #b93c0a; --sun-tint: #fbe6dc; --me: #1a73e8;
+  --sea: #0b6b65; --on-sea: #fff; --sun: #b93c0a; --on-sun: #fff; --sun-tint: #fbe6dc; --me: #1a73e8;
   --red: #b42318; --red-tint: #fdecea; --amber: #8a4b00; --amber-tint: #fff3d6; --green: #1e6b3a; --green-tint: #e7f3ea;
   --r-sm: 4px; --r: 8px; --r-lg: 12px;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -13,7 +13,7 @@
   :root {
     --bg: #0e1416; --surface: #172024; --surface-2: #222d32; --line: #2c383d;
     --text: #f2efe8; --text-2: #b4bec2; --text-3: #93a0a6;
-    --sea: #5fc9bf; --on-sea: #062321; --sun: #ff9a5c; --sun-tint: #3b2418; --me: #5ea2ff;
+    --sea: #5fc9bf; --on-sea: #062321; --sun: #ff9a5c; --on-sun: #2a1204; --sun-tint: #3b2418; --me: #5ea2ff;
     --red: #ff8a7a; --red-tint: #3a1c19; --amber: #f2c14e; --amber-tint: #33280f; --green: #7ad49f; --green-tint: #15291d;
   }
 }
@@ -33,7 +33,10 @@ button { font: inherit; color: inherit; }
 .app > section, .card { margin-top: 16px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
 .pad { padding: 16px; }
-[id] { scroll-margin-top: 76px; }
+/* anchors, scrollIntoView and keyboard focus clear the day tabs: pinned at the bottom on phones, sticky on top on desktop */
+html { scroll-padding: 16px 0 calc(88px + env(safe-area-inset-bottom)); }
+@media (max-width: 959px) { .app { padding-bottom: calc(96px + env(safe-area-inset-bottom)); } }
+@media (min-width: 960px) { html { scroll-padding: 76px 0 16px; } }
 
 .num { font-variant-numeric: tabular-nums; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -60,7 +63,7 @@ button { font: inherit; color: inherit; }
 }
 .chip.rain { background: var(--amber-tint); color: var(--amber); }
 .chip.storm { background: var(--red-tint); color: var(--red); }
-.chip.now { background: var(--sun); color: #fff; }
+.chip.now { background: var(--sun); color: var(--on-sun); }
 .chip.next { background: var(--sun-tint); color: var(--sun); }
 .chip.new { background: var(--green-tint); color: var(--green); }
 .sw { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--line); flex: none; display: inline-block; }

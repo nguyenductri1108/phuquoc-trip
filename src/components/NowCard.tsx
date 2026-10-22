@@ -26,7 +26,7 @@ export function NowCard(p: Props) {
     el.classList.add('is-shown');
   }, [phase, cur?.key, next?.key]);
   return (
-    <section className="card now t-stagger" ref={ref} aria-label="Bây giờ">
+    <section className="card nowcard t-stagger" ref={ref} aria-label="Bây giờ">
       {phase === 'before' ? <Before {...p} /> : phase === 'during' ? <During {...p} />
         : phase === 'after' ? <After /> : <p className="now-title">Chưa có lịch</p>}
     </section>
@@ -48,7 +48,7 @@ function Before({ trip, now, last, wx, onDay }: Props) {
         ))}
       </div>
       <div className="t-stagger-line t-stagger-line--3">
-        <p className="now-place">tới “{f.hoat_dong}” · {f.bat_dau} {dayLabel(START, f.ngay)}</p>
+        <p className="now-place">tới “{f.hoat_dong}” · <span className="nw">{f.bat_dau} {dayLabel(START, f.ngay)}</span></p>
         <ol className="overview" aria-label="Tóm tắt 4 ngày">
           {Array.from({ length: last }, (_, i) => i + 1).map(n => {
             const items = trip.lich.filter(x => x.ngay === n), w = wx.day(n);
@@ -86,7 +86,11 @@ function During({ trip, now, tl, today, wx, me, onGoto, onMap }: Props) {
   const soon = !cur && x.start - now <= SOON;
   const wear = dayEnd && !x.dresscode ? trip.lich.find(s => s.ngay === x.ngay && s.dresscode)?.dresscode : undefined;
   const frac = cur ? Math.min(1, (now - cur.start) / (cur.end - cur.start)) : 0;
-  const detail = <button className="btn" type="button" onClick={() => onGoto(x.key)}>{b ? 'Chi tiết & phương án B' : 'Chi tiết'}</button>;
+  const detail = (
+    <button className="btn" type="button" onClick={() => onGoto(x.key)} aria-label={b ? `Chi tiết và phương án B (${b.ten})` : 'Chi tiết'}>
+      <Icon name="info" />Chi tiết
+    </button>
+  );
   return (
     <>
       <p className={`eyebrow t-stagger-line t-stagger-line--1${cur ? ' live' : ''}`}>

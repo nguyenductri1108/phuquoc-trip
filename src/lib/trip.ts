@@ -57,19 +57,25 @@ export function normalize(raw: RawTrip, start: string): Trip {
     if (!p.id) return;
     const [lat, lng] = p.toa_do.split(',').map(v => parseFloat(v));
     const ok = Number.isFinite(lat) && Number.isFinite(lng);
-    if (!ok) issues.push(`quan dòng ${i + 2} (${p.id}): toạ độ "${p.toa_do}" không đọc được`);
+    if (!ok) issues.push(`quan dòng ${i + 2} (${p.id}): ${p.toa_do ? `toạ độ "${p.toa_do}" không đọc được` : 'chưa có toạ độ'} → chưa hiện trên bản đồ`);
     quan[p.id] = { ...p, lat: ok ? lat : null, lng: ok ? lng : null };
   });
   const lich: Stop[] = [];
   const ends = new Map<Stop, number | null>();
+  const days = new Set(raw.ngay.map(r => parseInt(r.ngay, 10)).filter(n => n >= 1));
+  // same 04:00 rule as dayOf: 0:00–3:59 is the late night of that trip day ("0:30" = "24:30")
+  const late = (m: number) => (m < 240 ? m + 1440 : m);
   raw.lich.forEach((r, i) => {
     const x = pick(r, STOP_KEYS);
     if (!x.hoat_dong) return;
-    const ngay = parseInt(r.ngay, 10), s = toMin(x.bat_dau), e = toMin(x.ket_thuc);
-    if (!(ngay >= 1) || Number.isNaN(s)) { issues.push(`lich dòng ${i + 2}: ngày/giờ "${str(r.ngay)} ${x.bat_dau}" không đọc được`); return; }
+    const ngay = parseInt(r.ngay, 10), s = late(toMin(x.bat_dau)), e = late(toMin(x.ket_thuc));
+    if (!(ngay >= 1) || (days.size && !days.has(ngay)) || Number.isNaN(s)) {
+      issues.push(`lich dòng ${i + 2}: ngày/giờ "${str(r.ngay)} ${x.bat_dau}" không đọc được (ngày phải có trong tab ngay)`);
+      return;
+    }
     for (const k of ['quan', 'du_phong'] as const)
       if (x[k] && !quan[x[k]]) issues.push(`lich dòng ${i + 2}: không có quán id "${x[k]}"`);
-    const d0 = dayStart(start, ngay), stop = { ...x, ngay, row: i + 2, start: d0 + s * MIN, end: 0, key: '' };
+    const d0 = dayStart(start, ngay), stop = { ...x, ngay, row: i + 2, start: d0 + s * MIN, end: 0, key: `it-${ngay}-${s}` };
     ends.set(stop, Number.isNaN(e) ? null : d0 + (e < s ? e + 1440 : e) * MIN);
     lich.push(stop);
   });
@@ -78,7 +84,7 @@ export function normalize(raw: RawTrip, start: string): Trip {
   lich.forEach((x, i) => {
     // ponytail: no ket_thuc = until the next stop, capped at 3h so "chơi game" doesn't run until breakfast
     x.end = ends.get(x) ?? Math.min(lich[i + 1]?.start ?? Infinity, x.start + 180 * MIN);
-    const k = `it-${x.ngay}-${toMin(x.bat_dau)}`;
+    const k = x.key;
     seen[k] = (seen[k] || 0) + 1;
     x.key = seen[k] > 1 ? `${k}-${seen[k]}` : k;
   });
@@ -133,18 +139,19 @@ export function diffTrips(a: Trip, b: Trip) {
   const name = (t: Trip, id: string) => t.quan[id]?.ten ?? id;
   const byKey = new Map(a.lich.map(x => [x.key, x])), byTitle = new Map(a.lich.map(x => [`${x.ngay}|${x.hoat_dong}`, x]));
   const sig = (t: Trip, x: Stop) => JSON.stringify([{ ...x, row: 0 }, t.quan[x.quan], t.quan[x.du_phong]]);
-  const msgs: string[] = [], keys: string[] = [];
+  const msgs: [number, string][] = [], keys: string[] = []; // [priority, text]: a swapped place matters most
   for (const x of b.lich) {
     const o = byKey.get(x.key) ?? byTitle.get(`${x.ngay}|${x.hoat_dong}`);
     if (o && sig(a, o) === sig(b, x)) continue;
     keys.push(x.key);
-    if (!o) msgs.push(`Thêm N${x.ngay} ${x.bat_dau}: ${x.hoat_dong}`);
-    else if (o.quan !== x.quan) msgs.push(`N${x.ngay} ${x.bat_dau}: ${name(a, o.quan)} → ${name(b, x.quan)}`);
-    else if (o.bat_dau !== x.bat_dau) msgs.push(`N${x.ngay} ${x.hoat_dong}: ${o.bat_dau} → ${x.bat_dau}`);
+    if (!o) msgs.push([1, `Thêm N${x.ngay} ${x.bat_dau}: ${x.hoat_dong}`]);
+    else if (o.quan !== x.quan) msgs.push([0, `N${x.ngay} ${x.bat_dau}: ${name(a, o.quan)} → ${name(b, x.quan)}`]);
+    else if (o.bat_dau !== x.bat_dau) msgs.push([2, `N${x.ngay} ${x.hoat_dong}: ${o.bat_dau} → ${x.bat_dau}`]);
   }
+  msgs.sort((p, q) => p[0] - q[0]);
   const changed = keys.length > 0 || a.lich.length !== b.lich.length
     || JSON.stringify([a.ngay, a.quan, a.canh_bao]) !== JSON.stringify([b.ngay, b.quan, b.canh_bao]);
-  const message = !changed ? '' : msgs.length ? msgs[0] + (msgs.length > 1 ? ` (+${msgs.length - 1} thay đổi khác)` : '') : 'Lịch vừa được cập nhật';
+  const message = !changed ? '' : msgs.length ? msgs[0][1] + (msgs.length > 1 ? ` (+${msgs.length - 1} thay đổi khác)` : '') : 'Lịch vừa được cập nhật';
   return { changed, keys, message };
 }
 
@@ -190,8 +197,14 @@ export const tel = (s: string) => 'tel:' + s.split('(')[0].replace(/[^\d+]/g, ''
 export const zalo = (s: string) =>
   /zalo/i.test(s) ? 'https://zalo.me/' + s.split('(')[0].replace(/[^\d+]/g, '').replace(/^\+84/, '0') : undefined;
 const placeId = (url: string) => /[?&]query_place_id=([\w-]+)/.exec(url)?.[1];
-export const dirUrl = (q: Place) => 'https://www.google.com/maps/dir/?api=1&destination=' + (placeId(q.maps)
-  ? `${encodeURIComponent(q.ten)}&destination_place_id=${placeId(q.maps)}` : `${q.lat},${q.lng}`);
+// best destination we have: Google place id > coordinates > the pasted Maps link > a text search for name + address
+export const dirUrl = (q: Place) => {
+  const dir = 'https://www.google.com/maps/dir/?api=1&destination=', pid = placeId(q.maps);
+  if (pid) return `${dir}${encodeURIComponent(q.ten)}&destination_place_id=${pid}`;
+  if (q.lat != null) return `${dir}${q.lat},${q.lng}`;
+  if (safeUrl(q.maps)) return q.maps;
+  return dir + encodeURIComponent([q.ten, q.dia_chi, 'Phú Quốc'].filter(Boolean).join(', '));
+};
 
 export interface LatLng { lat: number; lng: number }
 export const km = (a: LatLng, b: LatLng) => {
@@ -212,7 +225,9 @@ export async function fetchSheet(url: string): Promise<RawTrip> {
   const id = /\/d\/([\w-]{20,})/.exec(url)?.[1];
   if (!id) throw new Error('link Google Sheet không đúng dạng');
   const tabs = await Promise.all(Object.entries(SHEET_NEED).map(async ([tab, need]) => {
-    const r = await fetch(`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&headers=1&sheet=${tab}`, { cache: 'no-store' });
+    // a stalled request on island 4G must not block every later sync
+    const r = await fetch(`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&headers=1&sheet=${tab}`,
+      { cache: 'no-store', signal: AbortSignal.timeout(15_000) });
     if (!r.ok) throw new Error(`tab ${tab}: HTTP ${r.status}`);
     const rows = toObjects(parseCSV(await r.text()));
     // gviz quietly falls back to the first tab when a tab name doesn't exist

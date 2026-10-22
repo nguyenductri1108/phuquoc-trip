@@ -14,6 +14,8 @@ const pin = (label: string, cls: string, c: string) => L.divIcon({
   className: '', html: `<span class="pin ${cls}" style="--c:${c}">${label}</span>`, iconSize: cls === 'b' ? [18, 18] : [28, 28],
 });
 const meIcon = L.divIcon({ className: '', html: '<span class="me-dot"></span>', iconSize: [16, 16] });
+// keep auto-panned popups clear of the locate/fit column on the right
+const POPUP = { autoPanPaddingTopLeft: [16, 16] as L.PointTuple, autoPanPaddingBottomRight: [64, 16] as L.PointTuple };
 
 export interface Focus { q: Place; n: number }
 
@@ -49,8 +51,9 @@ export function MapView({ trip, day, now, cur, next, open, focus, meFocus, me, f
           return (
             <Fragment key={`b-${x.key}`}>
               {a?.lat != null && <Polyline positions={[ll(a), ll(b)]} interactive={false} className="leg hair" weight={1} />}
-              <Marker position={ll(b)} icon={pin('', 'b', color(b))} title={`Phương án B: ${b.ten}`} zIndexOffset={-100}>
-                <Popup autoPanPadding={[16, 16]}><PlaceCard q={b} note="Phương án B cho" stops={[x]} onGoto={onGoto} /></Popup>
+              <Marker position={ll(b)} icon={pin('', 'b', color(b))} title={`Phương án B: ${b.ten}`} zIndexOffset={-100}
+                ref={m => { if (m) markers.current.set(b.id, m); }}>
+                <Popup {...POPUP}><PlaceCard q={b} note="Phương án B cho" stops={[x]} onGoto={onGoto} /></Popup>
               </Marker>
             </Fragment>
           );
@@ -62,10 +65,11 @@ export function MapView({ trip, day, now, cur, next, open, focus, meFocus, me, f
           const its = items.filter(x => x.quan === id);
           const st = cur && its.includes(cur) ? 'now' : next && its.includes(next) ? 'next' : its.every(x => x.end <= now) ? 'past' : '';
           return (
-            <Marker key={`${id}-${st}`} position={ll(q)} icon={pin(no, `${no === '⌂' ? 'home ' : ''}${st}`, color(q))}
+            // key = place only: a stop starting/ending restyles the pin in place and keeps its open popup
+            <Marker key={id} position={ll(q)} icon={pin(no, `${no === '⌂' ? 'home ' : ''}${st}`, color(q))}
               title={q.ten} alt={q.ten} riseOnHover zIndexOffset={st === 'now' ? 1000 : 0}
               ref={m => { if (m) markers.current.set(id, m); }}>
-              <Popup autoPanPadding={[16, 16]}><PlaceCard q={q} stops={its} onGoto={onGoto} /></Popup>
+              <Popup {...POPUP}><PlaceCard q={q} stops={its} onGoto={onGoto} /></Popup>
             </Marker>
           );
         })}
