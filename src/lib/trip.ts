@@ -49,6 +49,13 @@ export function parseCSV(text: string) {
 export const toObjects = ([head = [], ...rows]: string[][]): Row[] => rows.map(r =>
   Object.fromEntries(head.map((k, i) => [k.trim(), (r[i] || '').trim()]).filter(([k]) => k)));
 
+// ponytail: fills a place row that is still a placeholder in the sheet ("giả định" / "chưa chốt") from config;
+// an edited row is left alone, so the sheet stays the source of truth.
+export const fillPlaceholder = (raw: RawTrip, id: string, place: Row): RawTrip => ({
+  ...raw,
+  quan: raw.quan.map(r => (r.id === id && /giả định|chưa chốt/i.test(`${r.loai} ${r.dia_chi}`) ? { ...r, ...place } : r)),
+});
+
 // Sheet rows (all strings) → render-ready trip. Bad rows are skipped and reported, never fatal.
 export function normalize(raw: RawTrip, start: string): Trip {
   const issues: string[] = [], quan: Record<string, Place> = {};

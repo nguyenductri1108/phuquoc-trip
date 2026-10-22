@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import bundled from '../data/trip.json';
-import { POLL_MS, SHEET_URL, START } from '../config.ts';
-import { HOUR, MIN, TZ, dayStart, diffTrips, fetchSheet, isoDate, normalize } from './trip.ts';
+import { POLL_MS, SHEET_URL, START, VILLA } from '../config.ts';
+import { HOUR, MIN, TZ, dayStart, diffTrips, fetchSheet, fillPlaceholder, isoDate, normalize } from './trip.ts';
 import type { LatLng, RawTrip } from './trip.ts';
 
 const store = {
@@ -49,7 +49,8 @@ export function useTripData(notify: (msg: string, keys?: string[]) => void) {
   });
   const [sync, setSync] = useState<SyncState>(() =>
     ({ state: SHEET_URL ? 'loading' : 'local', at: store.get<Cache>('pq-sheet')?.at ?? 0, err: '' }));
-  const trip = useMemo(() => normalize(raw, START), [raw]);
+  const load = (r: RawTrip) => normalize(fillPlaceholder(r, 'villa', VILLA), START);
+  const trip = useMemo(() => load(raw), [raw]);
   const current = useRef(trip);
   current.current = trip;
   const busy = useRef(false), pulled = useRef(0);
@@ -63,7 +64,7 @@ export function useTripData(notify: (msg: string, keys?: string[]) => void) {
     try {
       const data = await fetchSheet(SHEET_URL);
       store.set('pq-sheet', { at: Date.now(), data });
-      const d = diffTrips(current.current, normalize(data, START));
+      const d = diffTrips(current.current, load(data));
       if (d.changed) {
         setRaw(data);
         if (!first || fromCache.current) notify(`Sheet vừa cập nhật · ${d.message}`, d.keys);

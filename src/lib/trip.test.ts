@@ -1,9 +1,9 @@
 // npm test – checks the time model, CSV parsing and data validation against the real trip data.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { bring, byPhone, dayOf, dayPath, diffTrips, dirUrl, lines, links, normalize, numbering, parseCSV, swatches, tel, timeline, toMin, toObjects, until, zalo } from './trip.ts';
+import { bring, byPhone, dayOf, dayPath, diffTrips, dirUrl, fillPlaceholder, lines, links, normalize, numbering, parseCSV, swatches, tel, timeline, toMin, toObjects, until, zalo } from './trip.ts';
 import type { RawTrip } from './trip.ts';
-import { START } from '../config.ts';
+import { START, VILLA } from '../config.ts';
 import data from '../data/trip.json' with { type: 'json' };
 
 const raw = data as RawTrip;
@@ -89,6 +89,15 @@ test('bad sheet edits are reported, not fatal', () => {
   const r = normalize(broken, START);
   assert.equal(r.issues.length, 4);
   assert.equal(r.lich.length, 40);
+});
+
+test('placeholder villa row is filled from config until the sheet is edited', () => {
+  const sheet = structuredClone(raw);
+  const v = sheet.quan.find(r => r.id === 'villa')!;
+  Object.assign(v, { loai: 'Chỗ ở (vị trí giả định – sửa khi chốt villa)', toa_do: '10.204500, 103.965000' });
+  assert.equal(normalize(fillPlaceholder(sheet, 'villa', VILLA), START).quan.villa.lat, 10.1153507);
+  Object.assign(v, { loai: 'Homestay', dia_chi: 'Đã chốt' }); // edited in the sheet → the sheet wins
+  assert.equal(normalize(fillPlaceholder(sheet, 'villa', VILLA), START).quan.villa.lat, 10.2045);
 });
 
 test('0:00–3:59 is the late night of that trip day', () => {
