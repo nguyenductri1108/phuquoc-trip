@@ -22,16 +22,16 @@ export const simulated = Number.isFinite(parsed);
 const offset = simulated ? parsed - Date.now() : 0;
 const clock = () => Date.now() + offset;
 
-/** Current time; re-renders on each minute boundary (all times in the plan are HH:MM) and on wake. */
-export function useNow() {
+/** Current time, re-rendered on each `step` boundary (default: the minute – every time in the plan is HH:MM) and on wake. */
+export function useNow(step = MIN) {
   const [now, setNow] = useState(clock);
   useEffect(() => {
     let t = 0;
-    const tick = () => { clearTimeout(t); setNow(clock()); t = window.setTimeout(tick, MIN - (clock() % MIN) + 50); };
+    const tick = () => { clearTimeout(t); setNow(clock()); t = window.setTimeout(tick, step - (clock() % step) + 20); };
     tick();
     const off = onWake(tick);
     return () => { clearTimeout(t); off(); };
-  }, []);
+  }, [step]);
   return now;
 }
 

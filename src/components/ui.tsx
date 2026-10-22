@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { dirUrl, swatches, tel, wmo, zalo } from '../lib/trip.ts';
 import type { Place } from '../lib/trip.ts';
@@ -68,22 +68,13 @@ export function WxChip({ w }: { w: Wx }) {
   );
 }
 
-/** transitions.dev number pop-in: digits re-enter with blur whenever the value changes. */
+/** transitions.dev number pop-in. Each digit is keyed by position + character, so only the digits that
+ *  actually change are re-mounted and pop in – a ticking seconds counter animates one digit, not the group. */
 export function Digits({ value }: { value: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  useLayoutEffect(() => {
-    const g = ref.current!;
-    g.classList.remove('is-animating');
-    void g.offsetHeight; // force reflow so the animation replays
-    g.classList.add('is-animating');
-  }, [value]);
   const chars = [...value];
   return (
-    <span className="t-digit-group" ref={ref} aria-hidden="true">
-      {chars.map((ch, i) => (
-        <span key={`${value}-${i}`} className="t-digit"
-          data-stagger={i === chars.length - 2 ? 1 : i === chars.length - 1 ? 2 : undefined}>{ch}</span>
-      ))}
+    <span className="t-digit-group is-animating" aria-hidden="true">
+      {chars.map((ch, i) => <span key={`${chars.length - i}-${ch}`} className="t-digit">{ch}</span>)}
     </span>
   );
 }

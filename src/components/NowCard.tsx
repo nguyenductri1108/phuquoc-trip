@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { START } from '../config.ts';
 import { DAY, HOUR, MIN, OUTDOOR, dayLabel, fmtKm, fmtTime, isDone, km, lines, outfits, swatches, until, wmo } from '../lib/trip.ts';
 import type { LatLng, Stop, Trip } from '../lib/trip.ts';
+import { useNow } from '../lib/hooks.ts';
 import type { Weather } from '../lib/hooks.ts';
 import { Actions, Digits, Dress, Icon, WxChip } from './ui.tsx';
 import './NowCard.css';
@@ -33,17 +34,17 @@ export function NowCard(p: Props) {
   );
 }
 
-function Before({ trip, now, last, wx, onDay }: Props) {
-  // whole minutes, rounded up like until(): exactly 2 days out reads "2 ngày 00 giờ 00 phút"
-  const f = trip.lich[0], ms = Math.ceil(Math.max(0, f.start - now) / MIN) * MIN;
-  const d = Math.floor(ms / DAY), h = Math.floor(ms % DAY / HOUR), m = Math.floor(ms % HOUR / MIN);
+function Before({ trip, last, wx, onDay }: Props) {
+  const now = useNow(1000); // only the countdown ticks every second; the rest of the page stays on the minute clock
+  const f = trip.lich[0], ms = Math.max(0, f.start - now);
+  const d = Math.floor(ms / DAY), h = Math.floor(ms % DAY / HOUR), m = Math.floor(ms % HOUR / MIN), s = Math.floor(ms % MIN / 1000);
   const todo = trip.lich.flatMap(x => lines(x.dat_truoc)), left = todo.filter(l => !isDone(l)).length;
   const reds = trip.canh_bao.filter(w => w.muc.trim() === '🔴').length;
   return (
     <>
       <p className="eyebrow t-stagger-line t-stagger-line--1">Còn</p>
       <div className="count t-stagger-line t-stagger-line--2" role="timer" aria-label={`Còn ${d} ngày ${h} giờ ${m} phút`}>
-        {([[String(d), 'ngày'], [pad(h), 'giờ'], [pad(m), 'phút']] as const).map(([v, l]) => (
+        {([[String(d), 'ngày'], [pad(h), 'giờ'], [pad(m), 'phút'], [pad(s), 'giây']] as const).map(([v, l]) => (
           <span className="u" key={l} aria-hidden="true"><Digits value={v} /><small>{l}</small></span>
         ))}
       </div>
