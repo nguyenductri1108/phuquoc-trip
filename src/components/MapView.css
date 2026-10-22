@@ -1,7 +1,10 @@
 /* isolation keeps Leaflet's z-indexed panes/controls (up to 1000) inside the map, under the sticky day tabs */
-.mapbox { position: relative; isolation: isolate; height: 300px; margin-top: 16px; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); }
+.mapbox { position: relative; isolation: isolate; height: 440px; height: clamp(380px, 60svh, 560px); margin-top: 16px; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); }
 .mapbox:has(.leaflet-popup) .map-hint { display: none; }
 .leaflet-host { position: absolute; inset: 0; font: inherit; background: var(--surface-2); }
+/* Leaflet's own `plus-lighter` tile blend (a Chrome gap workaround) paints white seams on high-DPI phones once tiles overlap.
+   Normal blending + half a pixel of overlap: no gaps and no seams (measured at DPR 2 and 3, whole and fractional zoom). */
+.leaflet-container img.leaflet-tile { mix-blend-mode: normal; width: 256.5px !important; height: 256.5px !important; }
 .map-tools { position: absolute; right: 10px; bottom: 26px; z-index: 800; display: grid; gap: 8px; }
 .map-tools button {
   width: 44px; height: 44px; display: grid; place-items: center; border-radius: var(--r); border: 1px solid var(--line);

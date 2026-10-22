@@ -32,7 +32,8 @@ export function MapView({ trip, day, now, cur, next, open, focus, meFocus, me, f
 
   return (
     <div className="mapbox" id="map">
-      <MapContainer center={[10.2, 103.97]} zoom={10} minZoom={9} maxBounds={ISLAND} zoomControl={false}
+      {/* zoomSnap 0.25: fitting a day's route can land between whole zoom levels instead of backing off a full step */}
+      <MapContainer center={[10.2, 103.97]} zoom={10} minZoom={9} zoomSnap={0.25} maxBounds={ISLAND} zoomControl={false}
         dragging={!L.Browser.mobile} className="leaflet-host" aria-label="Bản đồ lộ trình trong ngày">
         <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19}
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
