@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { Circle, MapContainer, Marker, Polyline, Popup, TileLayer, ZoomControl, useMap } from 'react-leaflet';
+import { Circle, MapContainer, Marker, Polyline, Popup, ZoomControl, useMap } from 'react-leaflet';
 import { color, dayPath, dirUrl, numbering, tel } from '../lib/trip.ts';
 import type { LatLng, Place, Stop, Trip } from '../lib/trip.ts';
 import { Icon } from './ui.tsx';
@@ -16,6 +16,37 @@ const pin = (label: string, cls: string, c: string) => L.divIcon({
 const meIcon = L.divIcon({ className: '', html: '<span class="me-dot"></span>', iconSize: [16, 16] });
 // keep auto-panned popups clear of the locate/fit column on the right
 const POPUP = { autoPanPaddingTopLeft: [16, 16] as L.PointTuple, autoPanPaddingBottomRight: [64, 16] as L.PointTuple };
+
+// Keyless OSM tile servers, tried in order. Some networks/DNS filters block tile.openstreetmap.org (it resolved to
+// 127.0.0.1 behind a Tailscale DNS blocklist), so a provider whose tiles keep failing hands over to the next one.
+const OSM = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+const TILES = [
+  { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: OSM },
+  { url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png', attribution: `${OSM} · openstreetmap.de` },
+  { url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', attribution: `${OSM} · HOT/OSM France` },
+];
+
+function Tiles() {
+  const map = useMap();
+  useEffect(() => {
+    let layer: L.TileLayer;
+    const use = (i: number) => {
+      let errors = 0, loaded = false;
+      layer = L.tileLayer(TILES[i].url, { maxZoom: 19, attribution: TILES[i].attribution })
+        .on('tileload', () => { loaded = true; })
+        .on('tileerror', () => {
+          // a slow network doesn't fire errors; refused/blocked connections fail fast, before any tile loads
+          if (loaded || ++errors < 4 || i === TILES.length - 1) return;
+          layer.remove();
+          use(i + 1);
+        })
+        .addTo(map);
+    };
+    use(0);
+    return () => { layer.remove(); };
+  }, [map]);
+  return null;
+}
 
 export interface Focus { q: Place; n: number }
 
@@ -35,8 +66,7 @@ export function MapView({ trip, day, now, cur, next, open, focus, meFocus, me, f
       {/* zoomSnap 0.25: fitting a day's route can land between whole zoom levels instead of backing off a full step */}
       <MapContainer center={[10.2, 103.97]} zoom={10} minZoom={9} zoomSnap={0.25} maxBounds={ISLAND} zoomControl={false}
         dragging={!L.Browser.mobile} className="leaflet-host" aria-label="Bản đồ lộ trình trong ngày">
-        <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19}
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
+        <Tiles />
         {!L.Browser.mobile && <ZoomControl position="topleft" />}
 
         {path.slice(1).map((p, i) => {
