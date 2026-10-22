@@ -2,3 +2,5 @@ node_modules
 dist
 # the source spreadsheets stay on this machine – the site reads the Google Sheet
 *.xlsx
+.vercel
+.env*
