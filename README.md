@@ -44,6 +44,10 @@ Trên điện thoại, chọn "Thêm vào màn hình chính" (Safari: nút Chia 
 
 ## Deploy (host tĩnh)
 
+Link chính: <https://phuquoc-sscdm.vercel.app>. Đây là project `phuquoc-trip` trên Vercel, deploy bằng `npx vercel --prod`. Mỗi lần push lên `main`, GitHub Actions cũng tự deploy một bản lên GitHub Pages.
+
+Commit phải đứng tên `nguyenductri1108 <nguyenductri1108.thd@gmail.com>` (đã đặt riêng cho repo này qua `git config --local`). Nếu commit mang email khác, Vercel sẽ chặn deploy ("commit author doesn't have permission").
+
 `npm run build` rồi đưa thư mục `dist/` lên host. Cấu hình `base: './'` nên trang chạy được ở bất kỳ đường dẫn nào.
 
 - **Netlify Drop:** kéo thả `dist/` vào <https://app.netlify.com/drop>.
