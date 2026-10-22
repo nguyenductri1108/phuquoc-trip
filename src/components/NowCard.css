@@ -23,11 +23,50 @@
 .next-up b { display: block; font-weight: 600; }
 .next-up .in { margin-left: auto; font-size: 13px; color: var(--text-2); white-space: nowrap; }
 
-/* before the trip */
-.count { display: flex; gap: 18px; margin-top: 6px; font-weight: 800; }
-.count .u { display: flex; flex-direction: column; }
-.count .t-digit-group { font-size: 40px; line-height: 1.1; font-variant-numeric: tabular-nums; }
-.count small { font-size: 12px; font-weight: 600; color: var(--text-3); }
+/* ---------- before the trip: countdown over a sunset at sea (the app icon's scene) ---------- */
+.scene {
+  --sky-1: #ffe9cc; --sky-2: #fbc792; --sky-3: #f39a68; --sun-1: #ffc98f; --sun-2: #e8692e;
+  --sea-1: #0b6b65; --crest: #8fe0d6; --ink: #3b1a08; --label: #8a3f14;
+  --tile: rgb(255 255 255 / 0.74); --tile-edge: rgb(255 255 255 / 0.9); --tile-shadow: rgb(140 60 20 / 0.22);
+  position: relative; overflow: hidden; isolation: isolate;
+  margin: -16px -16px 0; padding: 18px 12px 70px; border-radius: var(--r-lg) var(--r-lg) 0 0;
+  background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 58%, var(--sky-3) 100%);
+  text-align: center;
+}
+.sun {
+  position: absolute; left: 50%; bottom: 14px; z-index: -1; width: 150px; height: 150px; margin-left: -75px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%, var(--sun-1), var(--sun-2) 72%);
+  box-shadow: 0 0 70px 24px color-mix(in srgb, var(--sun-2) 40%, transparent);
+  animation: sun-glow 6s ease-in-out infinite alternate;
+}
+@keyframes sun-glow { to { box-shadow: 0 0 90px 34px color-mix(in srgb, var(--sun-2) 55%, transparent); } }
+.plane { position: absolute; top: 16px; left: -24px; z-index: -1; font-size: 15px; color: var(--label); opacity: 0.55; animation: fly 16s linear infinite; }
+@keyframes fly { from { left: -24px; translate: 0 6px; } to { left: calc(100% + 8px); translate: 0 -4px; } }
+.sea { position: absolute; left: 0; bottom: 0; width: 200%; height: 46px; animation: drift 14s linear infinite; }
+.sea .swell { fill: var(--sea-1); }
+.sea .crest { fill: none; stroke: var(--crest); stroke-width: 2; opacity: 0.7; vector-effect: non-scaling-stroke; }
+@keyframes drift { to { translate: -50% 0; } }
+
+.scene-title { font-size: 12px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--label); }
+.count { display: grid; grid-template-columns: repeat(4, minmax(0, 72px)); justify-content: center; gap: 8px; margin-top: 12px; }
+.count .u { display: grid; justify-items: center; gap: 6px; }
+.count .tile {
+  display: grid; place-items: center; width: 100%; height: 64px; border-radius: 14px;
+  background: var(--tile); box-shadow: 0 8px 20px var(--tile-shadow), inset 0 1px 0 var(--tile-edge);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.count .t-digit-group { font-size: 36px; font-weight: 800; line-height: 1; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.count small { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--label); }
+.target { margin-top: 14px; font-weight: 600; }
+
+@media (prefers-color-scheme: dark) {
+  .scene {
+    --sky-1: #13222b; --sky-2: #3a2b2c; --sky-3: #8a4127; --sun-1: #ffb877; --sun-2: #d9541f;
+    --sea-1: #07403d; --crest: #5fc9bf; --ink: #fff4e8; --label: #ffd2ad;
+    --tile: rgb(255 255 255 / 0.12); --tile-edge: rgb(255 255 255 / 0.18); --tile-shadow: rgb(0 0 0 / 0.35);
+  }
+}
+@media (prefers-reduced-motion: reduce) { .sun, .plane, .sea { animation: none; } .plane { display: none; } }
 .overview { margin-top: 14px; border-top: 1px solid var(--line); }
 .overview button {
   display: grid; grid-template-columns: 28px 64px 1fr auto; gap: 8px; align-items: center; width: 100%; padding: 10px 0;

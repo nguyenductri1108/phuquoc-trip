@@ -42,14 +42,23 @@ function Before({ trip, last, wx, onDay }: Props) {
   const reds = trip.canh_bao.filter(w => w.muc.trim() === '🔴').length;
   return (
     <>
-      <p className="eyebrow t-stagger-line t-stagger-line--1">Còn</p>
-      <div className="count t-stagger-line t-stagger-line--2" role="timer" aria-label={`Còn ${d} ngày ${h} giờ ${m} phút`}>
-        {([[String(d), 'ngày'], [pad(h), 'giờ'], [pad(m), 'phút'], [pad(s), 'giây']] as const).map(([v, l]) => (
-          <span className="u" key={l} aria-hidden="true"><Digits value={v} /><small>{l}</small></span>
-        ))}
+      {/* sunset over the sea – same scene as the app icon */}
+      <div className="scene">
+        <span className="sun" aria-hidden="true" />
+        <span className="plane" aria-hidden="true">✈</span>
+        <p className="scene-title t-stagger-line t-stagger-line--1">Đếm ngược tới Phú Quốc</p>
+        <div className="count t-stagger-line t-stagger-line--2" role="timer" aria-label={`Còn ${d} ngày ${h} giờ ${m} phút`}>
+          {([[pad(d), 'ngày'], [pad(h), 'giờ'], [pad(m), 'phút'], [pad(s), 'giây']] as const).map(([v, l]) => (
+            <span className="u" key={l} aria-hidden="true"><span className="tile"><Digits value={v} /></span><small>{l}</small></span>
+          ))}
+        </div>
+        <svg className="sea" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true">
+          <path className="swell" d="M0 22 Q50 10 100 22 T200 22 T300 22 T400 22 T500 22 T600 22 T700 22 T800 22 V60 H0Z" />
+          <path className="crest" d="M0 22 Q50 10 100 22 T200 22 T300 22 T400 22 T500 22 T600 22 T700 22 T800 22" />
+        </svg>
       </div>
       <div className="t-stagger-line t-stagger-line--3">
-        <p className="now-place">tới “{f.hoat_dong}” · <span className="nw">{f.bat_dau} {dayLabel(START, f.ngay)}</span></p>
+        <p className="now-place target">✈ {f.hoat_dong} · <span className="nw">{f.bat_dau} {dayLabel(START, f.ngay)}</span></p>
         <ol className="overview" aria-label="Tóm tắt 4 ngày">
           {Array.from({ length: last }, (_, i) => i + 1).map(n => {
             const items = trip.lich.filter(x => x.ngay === n), w = wx.day(n);
