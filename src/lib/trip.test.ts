@@ -107,3 +107,13 @@ test('0:00–3:59 is the late night of that trip day', () => {
   assert.equal(hm(x.start), '10-25T00:30');
   assert.equal(x.key, 'it-1-1470');
 });
+
+test('sky follows the clock', async () => {
+  const { skyAt } = await import('./sky.ts');
+  const night = skyAt(2 * 60), noon = skyAt(12 * 60), dusk = skyAt(17 * 60 + 43);
+  assert.equal(night.sun, null);
+  assert.ok(night.moon && night.stars === 1);
+  assert.ok(noon.sun && noon.sun.y > 0.95 && noon.stars === 0 && noon.moon === null); // sun near the top at midday
+  assert.ok(dusk.sun && dusk.sun.x > 90 && dusk.sun.y < 0.05); // setting on the right, on the horizon
+  assert.match(noon.stops[0], /^#[0-9a-f]{6}$/);
+});

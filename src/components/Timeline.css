@@ -16,9 +16,14 @@
 .it .chips:empty { display: none; }
 .it-head .t-acc-chevron { margin-top: 3px; }
 
+/* the journey rail: travelled stretch in sea colour, the current stop fills up with sun as it runs */
+.tl { isolation: isolate; }
+.it[data-state="past"]::before { background: color-mix(in srgb, var(--sea) 55%, var(--line)); }
+.it[data-state="now"]::before { background: linear-gradient(var(--sun) calc(var(--p, 0) * 100%), var(--line) 0); }
+.it[data-state="now"]::after { content: ""; position: absolute; inset: 2px -10px; z-index: -1; border-radius: 14px; background: var(--sun-tint); }
 .it[data-state="past"] .it-head { color: var(--text-3); }
 .it[data-state="past"] .it-title { font-weight: 600; }
-.it[data-state="past"] .it-dot { background: var(--text-3); }
+.it[data-state="past"] .it-dot { background: var(--sea); border-color: var(--sea); }
 .it[data-state="now"] .it-dot { background: var(--sun); border-color: var(--sun); animation: ping-sun 1.6s ease-out infinite; }
 .it[data-state="now"] time, .it[data-state="next"] time { color: var(--sun); }
 .it[data-state="next"] .it-dot { border-color: var(--sun); }

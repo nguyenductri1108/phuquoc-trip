@@ -32,6 +32,7 @@ export function Timeline({ trip, day, now, cur, next, open, changed, ...rest }: 
         {items.length ? items.map((x, i) => (
           <StopItem key={x.key} x={x} i={i} q={trip.quan[x.quan]} b={trip.quan[x.du_phong]} no={nos.get(x.quan)}
             st={x === cur ? 'now' : x === next ? 'next' : x.end <= now ? 'past' : 'later'}
+            p={x === cur ? Math.min(1, (now - x.start) / (x.end - x.start)) : 0}
             open={open.has(x.key)} isNew={changed.has(x.key)} {...rest} />
         )) : <li className="hint">Chưa có lịch cho ngày này.</li>}
       </ol>
@@ -39,14 +40,14 @@ export function Timeline({ trip, day, now, cur, next, open, changed, ...rest }: 
   );
 }
 
-function StopItem({ x, i, q, b, no, st, open, isNew, wx, onToggle, onMap, onShare }: Common & {
-  x: Stop; i: number; q?: Place; b?: Place; no?: string; st: State; open: boolean; isNew: boolean;
+function StopItem({ x, i, q, b, no, st, p, open, isNew, wx, onToggle, onMap, onShare }: Common & {
+  x: Stop; i: number; q?: Place; b?: Place; no?: string; st: State; p: number; open: boolean; isNew: boolean;
 }) {
   const w = q && OUTDOOR.has(q.nhom) ? wx.at(x.start) : null;
   const price = x.gia || q?.gia, todo = lines(x.dat_truoc);
   const share = <button className="btn" type="button" onClick={() => onShare(x)}><Icon name="share" />Gửi</button>;
   return (
-    <li className="it t-acc" id={x.key} data-open={open} data-state={st} style={{ '--i': i } as CSSProperties}>
+    <li className="it t-acc" id={x.key} data-open={open} data-state={st} style={{ '--i': i, '--p': p } as CSSProperties}>
       <button className="it-head" type="button" aria-expanded={open} aria-controls={`${x.key}-p`} onClick={() => onToggle(x.key)}>
         <time className="num">{x.bat_dau}</time>
         <span className="it-dot" aria-hidden="true" />

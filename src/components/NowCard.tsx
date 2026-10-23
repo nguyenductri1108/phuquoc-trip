@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { skyAt } from '../lib/sky.ts';
 import { START } from '../config.ts';
 import { DAY, HOUR, MIN, OUTDOOR, dayLabel, fmtKm, fmtTime, isDone, km, lines, outfits, swatches, until, wmo } from '../lib/trip.ts';
 import type { LatLng, Stop, Trip } from '../lib/trip.ts';
@@ -52,10 +53,7 @@ function Before({ trip, last, wx, onDay }: Props) {
             <span className="u" key={l} aria-hidden="true"><span className="tile"><Digits value={v} /></span><small>{l}</small></span>
           ))}
         </div>
-        <svg className="sea" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true">
-          <path className="swell" d="M0 22 Q50 10 100 22 T200 22 T300 22 T400 22 T500 22 T600 22 T700 22 T800 22 V60 H0Z" />
-          <path className="crest" d="M0 22 Q50 10 100 22 T200 22 T300 22 T400 22 T500 22 T600 22 T700 22 T800 22" />
-        </svg>
+        <Sea />
       </div>
       <div className="t-stagger-line t-stagger-line--3">
         <p className="now-place target">✈ {f.hoat_dong} · <span className="nw">{f.bat_dau} {dayLabel(START, f.ngay)}</span></p>
@@ -87,7 +85,60 @@ function Before({ trip, last, wx, onDay }: Props) {
   );
 }
 
-function During({ trip, now, tl, today, wx, me, onGoto, onMap }: Props) {
+const Sea = () => (
+  <svg className="sea" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true">
+    <path className="swell" d="M0 22 Q50 10 100 22 T200 22 T300 22 T400 22 T500 22 T600 22 T700 22 T800 22 V60 H0Z" />
+    <path className="crest" d="M0 22 Q50 10 100 22 T200 22 T300 22 T400 22 T500 22 T600 22 T700 22 T800 22" />
+  </svg>
+);
+
+const hm = (s?: string) => (s ? +s.slice(0, 2) * 60 + +s.slice(3, 5) : undefined);
+
+/** The sky over the island right now: colours, sun or moon and stars follow the real clock and today's sunrise/sunset. */
+function LiveSky({ now, rise, set, children }: { now: number; rise?: string; set?: string; children: ReactNode }) {
+  const sky = skyAt(Math.floor((now + 7 * HOUR) % DAY / MIN), hm(rise), hm(set));
+  const style = { '--sky-1': sky.stops[0], '--sky-2': sky.stops[1], '--sky-3': sky.stops[2], '--sea-1': sky.sea, '--stars': sky.stars } as CSSProperties;
+  return (
+    <div className={`scene live${sky.stars > 0.5 ? ' night' : ''}`} style={style}>
+      <span className="stars" aria-hidden="true" />
+      {sky.moon && <span className="moon" aria-hidden="true" style={{ left: `${sky.moon.x}%`, bottom: `${40 + sky.moon.y * 36}px` }} />}
+      {sky.sun && <span className="orb" aria-hidden="true" style={{ left: `${sky.sun.x}%`, bottom: `${28 + sky.sun.y * 88}px`, '--orb': sky.sun.color } as CSSProperties} />}
+      <div className="t-stagger-line t-stagger-line--1">
+        <div className="scene-top"><span className="pill">{sky.label}</span>{children}</div>
+      </div>
+      <Sea />
+    </div>
+  );
+}
+
+/** Four day segments filling up as the trip goes, with the plane at "now". */
+function Track({ trip, now, today, last }: { trip: Trip; now: number; today: number; last: number }) {
+  const its = trip.lich.filter(s => s.ngay === today);
+  const part = its.length ? Math.min(1, Math.max(0, (now - its[0].start) / (Math.max(...its.map(s => s.end)) - its[0].start))) : 0;
+  const pos = (today - 1 + part) / last;
+  return (
+    <div className="track" role="img" aria-label={`Hành trình: ngày ${today}/${last}, đã đi ${Math.round(pos * 100)}%`}>
+      {Array.from({ length: last }, (_, i) => (
+        <span key={i} className="seg"><i style={{ '--f': i + 1 < today ? 1 : i + 1 > today ? 0 : part } as CSSProperties} /></span>
+      ))}
+      <span className="track-plane" style={{ left: `${pos * 100}%` }} aria-hidden="true">✈</span>
+    </div>
+  );
+}
+
+/** Time left in the current stop as a ring (elapsed share) around the minutes that remain. */
+function Ring({ frac, left }: { frac: number; left: number }) {
+  const r = 24, c = 2 * Math.PI * r, m = Math.max(0, Math.ceil(left / MIN));
+  return (
+    <svg className="ring" viewBox="0 0 60 60" role="img" aria-label={`Còn ${until(left)}`}>
+      <circle className="ring-track" cx="30" cy="30" r={r} />
+      <circle className="ring-fill" cx="30" cy="30" r={r} style={{ strokeDasharray: c, strokeDashoffset: c * (1 - frac) }} />
+      <text className="ring-label" x="30" y="30">{m >= 60 ? `${Math.floor(m / 60)}:${pad(m % 60)}` : `${m}′`}</text>
+    </svg>
+  );
+}
+
+function During({ trip, now, tl, today, last, wx, me, onGoto, onMap }: Props) {
   const { cur, next } = tl, x = cur ?? next;
   if (!x) return <p className="now-title">Tự do</p>;
   const q = trip.quan[x.quan], b = trip.quan[x.du_phong];
@@ -96,6 +147,7 @@ function During({ trip, now, tl, today, wx, me, onGoto, onMap }: Props) {
   const soon = !cur && x.start - now <= SOON;
   const wear = dayEnd && !x.dresscode ? trip.lich.find(s => s.ngay === x.ngay && s.dresscode)?.dresscode : undefined;
   const frac = cur ? Math.min(1, (now - cur.start) / (cur.end - cur.start)) : 0;
+  const wd = wx.day(today), wNow = wx.at(now);
   const detail = (
     <button className="btn" type="button" onClick={() => onGoto(x.key)} aria-label={b ? `Chi tiết và phương án B (${b.ten})` : 'Chi tiết'}>
       <Icon name="info" />Chi tiết
@@ -103,27 +155,32 @@ function During({ trip, now, tl, today, wx, me, onGoto, onMap }: Props) {
   );
   return (
     <>
-      <p className={`eyebrow t-stagger-line t-stagger-line--1${cur ? ' live' : ''}`}>
-        {cur ? `Đang diễn ra · ${x.bat_dau}–${fmtTime(x.end)}`
-          : dayEnd ? `Hết lịch hôm nay · mai ${x.bat_dau}` : `${soon ? 'Sắp tới' : 'Tự do · tiếp theo'} ${x.bat_dau}`}
-      </p>
-      <h2 className="now-title t-stagger-line t-stagger-line--2">{x.hoat_dong}</h2>
+      <LiveSky now={now} rise={wd?.rise} set={wd?.set}>
+        <span className="pill">Ngày {today}/{last}{wNow && ` · ${wmo(wNow.code)[1]} ${Math.round(wNow.t)}°`}</span>
+        <Track trip={trip} now={now} today={today} last={last} />
+      </LiveSky>
+      <div className="live-panel t-stagger-line t-stagger-line--2">
+        <p className={`eyebrow${cur ? ' live' : ''}`}>
+          {cur ? `Đang diễn ra · ${x.bat_dau}–${fmtTime(x.end)}`
+            : dayEnd ? `Hết lịch hôm nay · ngủ ngon 🌙` : `${soon ? 'Sắp tới' : 'Tự do · tiếp theo'} ${x.bat_dau}`}
+        </p>
+        <div className="live-row">
+          {cur && <Ring frac={frac} left={cur.end - now} />}
+          <div className="live-text">
+            <h2 className="now-title">{dayEnd ? `Mai ${x.bat_dau} · ${x.hoat_dong}` : x.hoat_dong}</h2>
+            {q && <p className="now-place">{q.ten}{q.danh_gia && ` · ★ ${q.danh_gia}`}</p>}
+          </div>
+        </div>
+      </div>
       <div className="t-stagger-line t-stagger-line--3">
-        {q && <p className="now-place">{q.ten}{q.danh_gia && ` · ★ ${q.danh_gia}`}</p>}
         <div className="now-meta">
           {x.dresscode && <span className="chip"><Dress s={x.dresscode} /></span>}
           {wear && <span className="chip">Mai mặc: <Dress s={wear} /></span>}
           {w && <WxChip w={w} />}
           {me && q?.lat != null && q.lng != null && <span className="chip">📍 cách bạn {fmtKm(km(me, { lat: q.lat, lng: q.lng }))}</span>}
         </div>
-        {cur ? (
-          <>
-            <div className="bar" role="progressbar" aria-label="Tiến độ" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(frac * 100)}>
-              <span style={{ '--p': frac } as CSSProperties} />
-            </div>
-            <p className="left"><b>còn {until(cur.end - now)}</b><span>xong lúc {fmtTime(cur.end)}</span></p>
-          </>
-        ) : <p className="left"><b>còn {until(x.start - now)}</b></p>}
+        {cur ? <p className="left"><b>còn {until(cur.end - now)}</b><span>xong lúc {fmtTime(cur.end)}</span></p>
+          : <p className="left"><b>còn {until(x.start - now)}</b>{dayEnd && <span>{dayLabel(START, x.ngay)}</span>}</p>}
         {q ? <Actions q={q} onMap={onMap}>{detail}</Actions> : <div className="acts">{detail}</div>}
       </div>
       {cur && next && (

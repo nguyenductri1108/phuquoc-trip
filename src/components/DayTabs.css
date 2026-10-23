@@ -5,6 +5,7 @@
 .days .t-tabs-pill { height: 52px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.12); }
 .days .t-tab b { font-size: 14px; }
 .days .t-tab > span { font-size: 12px; white-space: nowrap; }
+.days .t-tab.done b::after { content: "✓"; margin-left: 4px; font-size: 12px; color: var(--green); }
 .days .t-tab.today b::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 4px; border-radius: 50%; background: var(--sun); vertical-align: middle; }
 
 @media (max-width: 959px) {

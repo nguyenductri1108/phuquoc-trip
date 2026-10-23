@@ -9,8 +9,6 @@
 .now-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .now-meta:empty { display: none; }
 
-.bar { height: 6px; border-radius: 3px; background: var(--surface-2); margin-top: 14px; overflow: hidden; }
-.bar span { display: block; height: 100%; background: var(--sun); transform-origin: left; transform: scaleX(var(--p, 0)); transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1); }
 .left { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--text-3); margin-top: 6px; }
 .left b { color: var(--sun); font-weight: 700; }
 
@@ -67,6 +65,86 @@
   }
 }
 @media (prefers-reduced-motion: reduce) { .sun, .plane, .sea { animation: none; } .plane { display: none; } }
+
+/* ---------- during the trip: the sky over the island right now ---------- */
+/* registered so the browser can tween the gradient as the minutes pass */
+@property --sky-1 { syntax: "<color>"; inherits: true; initial-value: #0b1a2e; }
+@property --sky-2 { syntax: "<color>"; inherits: true; initial-value: #14294b; }
+@property --sky-3 { syntax: "<color>"; inherits: true; initial-value: #27426b; }
+@property --sea-1 { syntax: "<color>"; inherits: true; initial-value: #0b6b65; }
+.scene.live {
+  --pill-bg: rgb(255 255 255 / 0.62); --pill-fg: #10202b; --seg: rgb(255 255 255 / 0.42); --seg-fill: #ffffff; --plane: #10202b;
+  min-height: 188px; padding: 14px 14px 62px; text-align: left;
+  transition: --sky-1 1.2s ease-in-out, --sky-2 1.2s ease-in-out, --sky-3 1.2s ease-in-out, --sea-1 1.2s ease-in-out;
+}
+.scene.live.night { --pill-bg: rgb(8 18 34 / 0.5); --pill-fg: #f2f5ff; --seg: rgb(255 255 255 / 0.18); --seg-fill: #ffd9a8; --plane: #ffe7c4; }
+.scene-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  background: var(--pill-bg); color: var(--pill-fg); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.track { position: relative; flex-basis: 100%; display: flex; gap: 5px; margin-top: 12px; padding: 10px 0 6px; }
+.seg { flex: 1; height: 5px; border-radius: 3px; background: var(--seg); overflow: hidden; }
+.seg i { display: block; height: 100%; width: calc(var(--f) * 100%); border-radius: 3px; background: var(--seg-fill); transition: width 600ms var(--stagger-ease); }
+.track-plane {
+  position: absolute; top: 0; translate: -50% 0; font-size: 17px; line-height: 1; color: var(--plane);
+  transition: left 600ms var(--stagger-ease); animation: bob 3s ease-in-out infinite alternate;
+}
+@keyframes bob { to { transform: translateY(-3px) rotate(-4deg); } }
+
+.orb {
+  position: absolute; z-index: -1; width: 58px; height: 58px; margin-left: -29px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--orb) 55%, #fff), var(--orb) 70%);
+  box-shadow: 0 0 46px 16px color-mix(in srgb, var(--orb) 45%, transparent);
+  transition: left 1.2s ease-in-out, bottom 1.2s ease-in-out; animation: orb-glow 6s ease-in-out infinite alternate;
+}
+@keyframes orb-glow { to { box-shadow: 0 0 68px 26px color-mix(in srgb, var(--orb) 55%, transparent); } }
+.moon {
+  position: absolute; z-index: -1; width: 34px; height: 34px; margin-left: -17px; border-radius: 50%; background: #f5f1e4;
+  box-shadow: inset -10px -4px 0 0 #d6cfb9, 0 0 34px 10px rgb(245 241 228 / 0.22); transition: left 1.2s ease-in-out, bottom 1.2s ease-in-out;
+}
+/* two star layers; the second one twinkles. Overall strength follows how dark the sky is. */
+.stars, .stars::after { position: absolute; inset: 0 0 40px; z-index: -2; pointer-events: none; }
+.stars {
+  opacity: var(--stars);
+  background:
+    radial-gradient(1.5px 1.5px at 8% 30%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 19% 62%, #fff 60%, transparent 62%),
+    radial-gradient(1.5px 1.5px at 33% 18%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 47% 48%, #fff 60%, transparent 62%),
+    radial-gradient(2px 2px at 61% 24%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 74% 58%, #fff 60%, transparent 62%),
+    radial-gradient(1.5px 1.5px at 88% 16%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 95% 44%, #fff 60%, transparent 62%);
+}
+.stars::after {
+  content: ""; inset: 0;
+  background:
+    radial-gradient(1.5px 1.5px at 14% 12%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 27% 40%, #fff 60%, transparent 62%),
+    radial-gradient(2px 2px at 54% 10%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 69% 38%, #fff 60%, transparent 62%),
+    radial-gradient(1.5px 1.5px at 82% 30%, #fff 60%, transparent 62%);
+  animation: twinkle 2.6s ease-in-out infinite alternate;
+}
+@keyframes twinkle { from { opacity: 1; } to { opacity: 0.25; } }
+
+/* the current stop: a frosted card resting on the water */
+.live-panel {
+  position: relative; margin-top: -34px; padding: 14px; border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 84%, transparent); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid color-mix(in srgb, var(--line) 65%, transparent); box-shadow: 0 12px 30px rgb(10 30 50 / 0.16);
+}
+.live-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.live-text { min-width: 0; }
+.live-row .now-title { margin-top: 0; font-size: 20px; text-wrap: balance; }
+.ring { width: 60px; height: 60px; flex: none; }
+.ring-track { fill: none; stroke: var(--surface-2); stroke-width: 5; }
+.ring-fill {
+  fill: none; stroke: var(--sun); stroke-width: 5; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 30px 30px;
+  transition: stroke-dashoffset 600ms var(--stagger-ease);
+}
+.ring-label { fill: var(--text); font: 800 13px/1 var(--font); text-anchor: middle; dominant-baseline: central; font-variant-numeric: tabular-nums; }
+.live-panel + .t-stagger-line .now-meta { margin-top: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scene.live, .orb, .moon, .seg i, .track-plane, .ring-fill { transition: none; }
+  .orb, .track-plane, .stars::after { animation: none; }
+}
 .overview { margin-top: 14px; border-top: 1px solid var(--line); }
 .overview button {
   display: grid; grid-template-columns: 28px 64px 1fr auto; gap: 8px; align-items: center; width: 100%; padding: 10px 0;
@@ -82,7 +160,7 @@
 .prep a { font-size: 13px; font-weight: 600; text-decoration: none; padding: 6px 10px; border-radius: var(--r); background: var(--surface-2); color: var(--text); }
 .prep a.bad { background: var(--red-tint); color: var(--red); }
 
-@media (prefers-reduced-motion: reduce) { .eyebrow.live::before { animation: none; } .bar span { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .eyebrow.live::before { animation: none; } }
 
 /* phones: one row of app-style buttons (icon over label) instead of two wrapped rows */
 @media (max-width: 959px) {

@@ -48,9 +48,9 @@ export function DayTabs({ last, day, today, wx, onSelect }: {
       {Array.from({ length: last }, (_, i) => i + 1).map(n => {
         const w = wx.day(n);
         return (
-          <button key={n} className={`t-tab${n === today ? ' today' : ''}`} type="button" role="tab" id={`tab-${n}`}
+          <button key={n} className={`t-tab${n === today ? ' today' : today && n < today ? ' done' : ''}`} type="button" role="tab" id={`tab-${n}`}
             aria-selected={n === day} aria-controls="timeline" tabIndex={n === day ? 0 : -1} onClick={() => onSelect(n)}>
-            <b>Ngày {n}{n === today && <span className="sr"> (hôm nay)</span>}</b>
+            <b>Ngày {n}{n === today && <span className="sr"> (hôm nay)</span>}{today > 0 && n < today && <span className="sr"> (đã xong)</span>}</b>
             <span className="num">{dayLabel(START, n)}{w && <span title={`${wmo(w.code)[2]} ${Math.round(w.max)}°`}> {wmo(w.code)[1]}</span>}</span>
           </button>
         );
